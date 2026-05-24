@@ -42,9 +42,10 @@ const pagePath = currentPage === 'home' ? '' : currentPage;
       Spacer that matches the header's rendered height.
       The header is position:fixed so it's out of document flow.
       This div prevents page content from sitting under the header.
-      JS in Header.astro keeps its height in sync.
+      min-height CSS default (nav 62px + strip ~29px) prevents content flash before JS runs.
+      JS in Header.astro keeps its exact height in sync.
     -->
-    <div id="header-spacer" aria-hidden="true"></div>
+    <div id="header-spacer" aria-hidden="true" style={`min-height: ${currentPage === 'home' ? '143' : '91'}px`}></div>
     <main class="flex-1">
       <slot />
     </main>

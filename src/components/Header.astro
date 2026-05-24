@@ -184,7 +184,13 @@ const announcements = {
   header?.addEventListener('transitionend', syncSpacer);
   const ro = new ResizeObserver(syncSpacer);
   if (header) ro.observe(header);
-  syncSpacer();
+  // Defer until layout is ready — offsetHeight is 0 in inline scripts before first paint
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncSpacer);
+  } else {
+    syncSpacer();
+  }
+  window.addEventListener('load', syncSpacer);
 
   // ── Logo collapse + announcement bar hide on scroll ──────────────────────────
   const logoLink = document.getElementById('header-logo-link');
