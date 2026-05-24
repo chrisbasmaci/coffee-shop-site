@@ -120,7 +120,8 @@ const announcements = {
     </span>
   </div>
 
-  <!-- ROTATING ANNOUNCEMENT BAR — collapses on scroll -->
+  <!-- ROTATING ANNOUNCEMENT BAR — home page only, collapses on scroll -->
+  {currentPage === 'home' && (
   <div id="announcement-bar" class="bg-black" role="status" aria-live="polite">
     <p
       id="announcement-text"
@@ -129,6 +130,7 @@ const announcements = {
       {announcements[lang][0]}
     </p>
   </div>
+  )}
 
   <!-- Mobile menu -->
   <div id="mobile-nav" class="hidden md:hidden bg-navy border-t border-caramel/20" style="position: relative; z-index: 30;">
