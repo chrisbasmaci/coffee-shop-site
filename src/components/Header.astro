@@ -30,7 +30,7 @@ const announcement = lang === 'tr'
   State 2 (scrolled, class "is-scrolled" on #site-header):
     plaque collapses, inline logo appears in the nav bar.
 -->
-<div id="site-header" class="sticky top-0 z-50">
+<div id="site-header" class="fixed top-0 left-0 right-0 z-50">
 
   <!-- ① PLAQUE / HERO LOGO BLOCK — collapses on scroll -->
   <div
@@ -180,29 +180,40 @@ const announcement = lang === 'tr'
 </div><!-- #site-header -->
 
 <script>
-  // ── Two-state scroll behaviour ─────────────────────────────────────────────
-  // Hysteresis: collapse when scrolling DOWN past 80px,
-  // restore only when scrolling back UP below 40px.
-  // This gap prevents the header-height-change → scrollY-shift feedback loop
-  // that causes jitter when scrolling slowly near the threshold.
-  const header       = document.getElementById('site-header')!;
-  const plaque       = document.getElementById('header-plaque')!;
-  const strip        = document.getElementById('header-strip')!;
-  const announcement = document.getElementById('header-announcement')!;
-  const inlineLogo   = document.getElementById('nav-inline-logo') as HTMLAnchorElement;
+  // ── Fixed header: spacer keeps content from sliding under it ──────────────
+  // Using position:fixed means scrollY is NEVER affected by header height
+  // changes, which eliminates the collapse→layout-shift→scrollY-change→
+  // restore feedback loop that caused jitter.
+
+  const header  = document.getElementById('site-header')!;
+  const plaque  = document.getElementById('header-plaque')!;
+  const strip   = document.getElementById('header-strip')!;
+  const announce = document.getElementById('header-announcement')!;
+  const inlineLogo = document.getElementById('nav-inline-logo') as HTMLAnchorElement;
+  const spacer  = document.getElementById('header-spacer') as HTMLElement;
+
+  // Keep spacer height = header height at all times
+  function syncSpacer() {
+    if (spacer) spacer.style.height = header.offsetHeight + 'px';
+  }
+
+  // Also sync after every CSS transition frame
+  header.addEventListener('transitionend', syncSpacer);
+
+  const ro = new ResizeObserver(syncSpacer);
+  ro.observe(header);
 
   let scrolled = false;
-
-  const COLLAPSE_AT = 80;   // collapse  when scrollY crosses this going down
-  const RESTORE_AT  = 40;   // restore   when scrollY crosses this going up
+  // Single threshold — no hysteresis needed because scrollY is now stable
+  const THRESHOLD = 60;
 
   function collapse() {
-    plaque.style.maxHeight       = '0px';
-    plaque.style.paddingTop      = '0px';
-    plaque.style.paddingBottom   = '0px';
-    strip.style.maxHeight        = '0px';
-    announcement.style.maxHeight = '0px';
-    inlineLogo.style.opacity       = '1';
+    plaque.style.maxHeight        = '0px';
+    plaque.style.paddingTop       = '0px';
+    plaque.style.paddingBottom    = '0px';
+    strip.style.maxHeight         = '0px';
+    announce.style.maxHeight      = '0px';
+    inlineLogo.style.opacity      = '1';
     inlineLogo.style.pointerEvents = 'auto';
     inlineLogo.removeAttribute('aria-hidden');
     inlineLogo.tabIndex = 0;
@@ -210,12 +221,12 @@ const announcement = lang === 'tr'
   }
 
   function restore() {
-    plaque.style.maxHeight       = '160px';
-    plaque.style.paddingTop      = '';
-    plaque.style.paddingBottom   = '';
-    strip.style.maxHeight        = '28px';
-    announcement.style.maxHeight = '36px';
-    inlineLogo.style.opacity       = '0';
+    plaque.style.maxHeight        = '160px';
+    plaque.style.paddingTop       = '';
+    plaque.style.paddingBottom    = '';
+    strip.style.maxHeight         = '28px';
+    announce.style.maxHeight      = '36px';
+    inlineLogo.style.opacity      = '0';
     inlineLogo.style.pointerEvents = 'none';
     inlineLogo.setAttribute('aria-hidden', 'true');
     inlineLogo.tabIndex = -1;
@@ -224,18 +235,19 @@ const announcement = lang === 'tr'
 
   function onScroll() {
     const y = window.scrollY;
-    if (!scrolled && y > COLLAPSE_AT) { scrolled = true;  collapse(); }
-    if ( scrolled && y < RESTORE_AT)  { scrolled = false; restore();  }
+    if (!scrolled && y > THRESHOLD) { scrolled = true;  collapse(); }
+    else if (scrolled && y <= THRESHOLD) { scrolled = false; restore(); }
   }
 
-  // Initial state on page load / back-navigation
-  if (window.scrollY > COLLAPSE_AT) { scrolled = true; collapse(); }
+  // Initial state
+  syncSpacer();
+  if (window.scrollY > THRESHOLD) { scrolled = true; collapse(); }
 
   window.addEventListener('scroll', onScroll, { passive: true });
 
   // ── Mobile menu toggle ────────────────────────────────────────────────────
-  const toggle   = document.getElementById('nav-toggle');
-  const menu     = document.getElementById('mobile-nav');
+  const toggle    = document.getElementById('nav-toggle');
+  const menu      = document.getElementById('mobile-nav');
   const iconOpen  = document.getElementById('icon-open');
   const iconClose = document.getElementById('icon-close');
 
@@ -245,6 +257,7 @@ const announcement = lang === 'tr'
     iconOpen?.classList.toggle('hidden', !isOpen);
     iconClose?.classList.toggle('hidden', isOpen);
     toggle.setAttribute('aria-expanded', String(!isOpen));
+    syncSpacer();
   });
 </script>
 
