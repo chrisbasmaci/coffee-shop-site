@@ -24,11 +24,6 @@ const page = t.en.contact;
       <div class="flex flex-col gap-8">
         <ContactCard label={page.labels.address} value={siteInfo.address.en} />
         <ContactCard
-          label={page.labels.phone}
-          value={siteInfo.phone}
-          href={`tel:${siteInfo.phone.replace(/\s/g, '')}`}
-        />
-        <ContactCard
           label={page.labels.email}
           value={siteInfo.email}
           href={`mailto:${siteInfo.email}`}
@@ -62,19 +57,14 @@ const page = t.en.contact;
       </div>
 
       <div class="flex flex-col gap-4">
-        <!-- Replace with real Google Maps <iframe> -->
-        <div
-          class="rounded-xl overflow-hidden border border-warm-border bg-parchment aspect-video flex flex-col items-center justify-center gap-3"
-          aria-label={page.mapPlaceholder}
-        >
-          <svg class="w-10 h-10 text-caramel/30" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <p class="text-sm text-sand/70">{page.mapPlaceholder}</p>
-        </div>
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3010.4!2d28.9688147!3d41.0109701!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab993e122c615%3A0x97b28ae77ec9b230!2sCinili+Cafe!5e0!3m2!1sen!2str!4v1748134000000!5m2!1sen!2str"
+          class="w-full aspect-video rounded-xl border border-warm-border"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Cinili Cafe on Google Maps"
+          allowfullscreen
+        ></iframe>
 
         <a
           href={siteInfo.mapsUrl}

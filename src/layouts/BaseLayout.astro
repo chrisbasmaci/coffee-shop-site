@@ -49,5 +49,38 @@ const pagePath = currentPage === 'home' ? '' : currentPage;
       <slot />
     </main>
     <Footer lang={lang} />
+
+    <!-- Sticky bottom bar (Bacha-style) -->
+    <div
+      class="fixed bottom-0 left-0 right-0 z-40 bg-navy border-t border-caramel/20"
+      style="height: 44px;"
+    >
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+        <span class="text-cream/45 text-[10px] tracking-[0.15em] uppercase">
+          &copy; 2026 Cinili Cafe
+          <span class="hidden sm:inline">&nbsp;&mdash;&nbsp;{lang === 'tr' ? 'Tüm Hakları Saklıdır' : 'All Rights Reserved'}</span>
+        </span>
+        <a
+          href="https://instagram.com/cinilicafe"
+          target="_blank"
+          rel="noopener"
+          class="text-cream/45 hover:text-cream transition-colors text-[10px] tracking-[0.18em] uppercase font-medium"
+        >
+          @cinilicafe
+        </a>
+        <button
+          onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
+          class="text-cream/45 hover:text-cream transition-colors text-[10px] tracking-[0.15em] uppercase flex items-center gap-1.5"
+          aria-label="Scroll to top"
+        >
+          <span class="hidden sm:inline">{lang === 'tr' ? 'Yukarı' : 'Back to top'}</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <!-- Spacer so the page footer content isn't hidden behind the sticky bar -->
+    <div style="height: 44px;" aria-hidden="true"></div>
   </body>
 </html>

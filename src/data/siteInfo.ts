@@ -3,21 +3,20 @@ import type { Lang } from './navigation';
 export const siteInfo = {
   name: 'CiniliCafe',
   address: {
-    tr: 'Adres bilgisi yakında eklenecek, İstanbul',
-    en: 'Address information coming soon, Istanbul',
+    tr: 'Beyazıt Kapalıçarşı, Halıcılar Cd. no 97, 34126 Fatih/İstanbul',
+    en: 'Beyazıt Grand Bazaar, Halıcılar Cd. no 97, 34126 Fatih/Istanbul',
   },
-  phone: '+90 212 000 00 00',
-  email: 'info@cinilikafe.com',
-  instagram: 'https://instagram.com/cinilikafe',
-  mapsUrl: 'https://maps.google.com/',
+  email: 'kachtiles@gmail.com',
+  instagram: 'https://instagram.com/cinilicafe',
+  mapsUrl: 'https://maps.app.goo.gl/DgeNiFT3h1kFbXe18',
   openingHours: {
     tr: [
-      'Pazartesi – Cuma: 08:00 – 22:00',
-      'Cumartesi – Pazar: 09:00 – 23:00',
+      'Pazartesi – Cumartesi: 09:00 – 19:00',
+      'Pazar: Kapalı',
     ],
     en: [
-      'Monday – Friday: 08:00 – 22:00',
-      'Saturday – Sunday: 09:00 – 23:00',
+      'Monday – Saturday: 09:00 – 19:00',
+      'Sunday: Closed',
     ],
   },
 };

@@ -19,82 +19,60 @@ const links: { key: PageKey; label: string; href: string }[] = [
   { key: 'contact', label: nav.contact, href: `/${lang}/contact` },
 ];
 
-const announcement = lang === 'tr'
-  ? 'Menülerimizi ve güncel ürünlerimizi keşfedin.'
-  : 'Discover our menus and current shop items.';
+const announcements = {
+  tr: [
+    'Menümüzü ve mağazamızı keşfedin.',
+    'Büyük Çarşı\'da sizi bekliyoruz.',
+    'El yapımı çinili ürünlerimizi görün.',
+  ],
+  en: [
+    'Discover our menu and shop.',
+    'Visit us at the Grand Bazaar.',
+    'Explore our handcrafted tile products.',
+  ],
+};
 ---
 
-<!--
-  Two-state sticky header.
-  State 1 (top): plaque logo block above the nav bar is visible.
-  State 2 (scrolled, class "is-scrolled" on #site-header):
-    plaque collapses, inline logo appears in the nav bar.
--->
 <div id="site-header" class="fixed top-0 left-0 right-0 z-50">
 
-  <!-- ① PLAQUE / HERO LOGO BLOCK — collapses on scroll -->
-  <div
-    id="header-plaque"
-    class="bg-espresso overflow-hidden transition-all duration-500 ease-in-out"
-    style="max-height: 160px;"
-    aria-hidden="false"
-  >
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center py-5">
-      <a
-        href={`/${lang}/`}
-        class="group"
-        aria-label="CiniliCafe – Ana Sayfa"
-        tabindex="0"
-      >
-        <img
-          src="/images/logo.png"
-          alt="Çinili"
-          class="h-20 sm:h-24 w-auto object-contain drop-shadow-md
-                 group-hover:opacity-90 transition-opacity duration-300"
-          loading="eager"
-        />
-      </a>
-    </div>
-  </div>
-
-  <!-- ② MAIN NAV BAR — always visible, dark -->
+  <!-- MAIN NAV BAR — logo absolutely positioned at far left, protrudes below -->
   <nav
-    class="bg-espresso border-t border-caramel/15"
+    class="bg-navy relative"
+    style="overflow: visible; height: 62px;"
     aria-label={lang === 'tr' ? 'Ana menü' : 'Main navigation'}
   >
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-[1fr_auto_1fr] items-center h-12 sm:h-14">
+    <!-- Logo — absolute, far left edge, starts 20% down, hangs over strip below -->
+    <a
+      id="header-logo-link"
+      href={`/${lang}/`}
+      class="block shrink-0"
+      style="position: absolute; left: 1.25rem; top: 12px; z-index: 20;"
+      aria-label="CiniliCafe – Ana Sayfa"
+    >
+      <img
+        id="header-logo-img"
+        src="/images/logo.png"
+        alt="Çinili"
+        class="h-28 w-auto object-contain drop-shadow-lg hover:opacity-90 transition-opacity"
+        loading="eager"
+      />
+    </a>
 
-      <!-- Inline logo — hidden at top, fades in on scroll -->
-      <a
-        id="nav-inline-logo"
-        href={`/${lang}/`}
-        class="opacity-0 transition-all duration-500 pointer-events-none shrink-0"
-        aria-hidden="true"
-        tabindex="-1"
-      >
-        <img
-          src="/images/logo.png"
-          alt="Çinili"
-          class="h-7 w-auto object-contain"
-          loading="eager"
-        />
-      </a>
-
+    <div
+      class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-[1fr_auto]"
+      style="height: 62px; align-items: center;"
+    >
       <!-- Desktop links — centred -->
-      <ul
-        class="hidden md:flex items-center gap-6 lg:gap-9"
-        role="list"
-        id="desktop-nav-links"
-      >
+      <ul class="hidden md:flex items-center justify-center gap-6 lg:gap-10 h-full" role="list">
         {links.map(link => (
           <li>
             <a
               href={link.href}
               class:list={[
-                'text-xs tracking-[0.15em] uppercase font-medium transition-colors duration-200',
+                'text-[11px] tracking-[0.2em] uppercase font-medium transition-colors duration-200',
                 link.key === currentPage
                   ? 'text-caramel'
-                  : 'text-cream/60 hover:text-cream',
+                  : 'text-cream/65 hover:text-cream',
               ]}
               aria-current={link.key === currentPage ? 'page' : undefined}
             >
@@ -105,12 +83,10 @@ const announcement = lang === 'tr'
       </ul>
 
       <!-- Right: language toggle + hamburger -->
-      <div class="flex items-center gap-3 justify-end">
-        <!-- Language toggle styled for dark background -->
-        <div class="text-xs tracking-[0.12em] uppercase font-medium">
+      <div class="flex items-center gap-3 justify-end h-full">
+        <div class="text-[11px] tracking-[0.15em] uppercase font-medium">
           <LanguageToggle lang={lang} currentPage={currentPage} />
         </div>
-
         <button
           id="nav-toggle"
           class="md:hidden p-1.5 text-cream/70 hover:text-cream transition-colors rounded"
@@ -129,36 +105,31 @@ const announcement = lang === 'tr'
     </div>
   </nav>
 
-  <!-- ③ DECORATIVE STRIP — geometric tile-inspired border -->
+  <!-- DECORATIVE STRIP — geometric tile diamonds, logo overlaps from above -->
   <div
-    id="header-strip"
-    class="overflow-hidden transition-all duration-500 ease-in-out"
-    style="max-height: 28px;"
+    class="bg-[#0d1220] border-y border-caramel/30 py-1.5 overflow-hidden"
+    style="position: relative; z-index: 10;"
     aria-hidden="true"
   >
-    <div class="bg-caramel/10 border-y border-caramel/20 py-1.5 flex items-center justify-center gap-0 overflow-hidden">
-      <!-- Repeating geometric tile motif -->
-      <span class="flex items-center gap-3 text-caramel/40 text-[9px] tracking-[0.4em] uppercase font-sans select-none whitespace-nowrap">
-        {Array(18).fill(null).map(() => (
-          <span aria-hidden="true">◆</span>
-        ))}
-      </span>
-    </div>
+    <span class="flex items-center justify-center gap-3.5 text-caramel/55 text-[10px] select-none whitespace-nowrap">
+      {Array(28).fill(null).map(() => (
+        <span>◆</span>
+      ))}
+    </span>
   </div>
 
-  <!-- ④ ANNOUNCEMENT BAR — collapses on scroll -->
-  <div
-    id="header-announcement"
-    class="bg-ink overflow-hidden transition-all duration-500 ease-in-out"
-    style="max-height: 36px;"
-  >
-    <p class="text-center text-[10px] sm:text-xs tracking-[0.18em] uppercase text-cream/50 font-sans py-2.5 px-4">
-      {announcement}
+  <!-- ROTATING ANNOUNCEMENT BAR — black, white text -->
+  <div class="bg-black py-2.5" role="status" aria-live="polite">
+    <p
+      id="announcement-text"
+      class="text-center text-[11px] tracking-[0.22em] uppercase text-white font-medium px-4 transition-opacity duration-500"
+    >
+      {announcements[lang][0]}
     </p>
   </div>
 
-  <!-- Mobile menu — sits outside the scroll-affected blocks -->
-  <div id="mobile-nav" class="hidden md:hidden bg-espresso border-t border-caramel/20">
+  <!-- Mobile menu -->
+  <div id="mobile-nav" class="hidden md:hidden bg-navy border-t border-caramel/20" style="position: relative; z-index: 30;">
     <ul class="max-w-6xl mx-auto px-4 py-1 flex flex-col" role="list">
       {links.map(link => (
         <li>
@@ -179,74 +150,69 @@ const announcement = lang === 'tr'
 
 </div><!-- #site-header -->
 
-<script>
-  // ── Fixed header: spacer keeps content from sliding under it ──────────────
-  // Using position:fixed means scrollY is NEVER affected by header height
-  // changes, which eliminates the collapse→layout-shift→scrollY-change→
-  // restore feedback loop that caused jitter.
+<style>
+  #header-logo-img {
+    transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #header-logo-link {
+    transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+</style>
 
-  const header  = document.getElementById('site-header')!;
-  const plaque  = document.getElementById('header-plaque')!;
-  const strip   = document.getElementById('header-strip')!;
-  const announce = document.getElementById('header-announcement')!;
-  const inlineLogo = document.getElementById('nav-inline-logo') as HTMLAnchorElement;
-  const spacer  = document.getElementById('header-spacer') as HTMLElement;
+<script define:vars={{ announcements, lang }}>
+  // ── Spacer sync ──────────────────────────────────────────────────────────
+  const header = document.getElementById('site-header');
+  const spacer = document.getElementById('header-spacer');
 
-  // Keep spacer height = header height at all times
   function syncSpacer() {
-    const headerH = header.offsetHeight;
-    if (spacer) spacer.style.height = headerH + 'px';
+    if (spacer && header) spacer.style.height = header.offsetHeight + 'px';
   }
-
-  // Also sync after every CSS transition frame
-  header.addEventListener('transitionend', syncSpacer);
-
+  header?.addEventListener('transitionend', syncSpacer);
   const ro = new ResizeObserver(syncSpacer);
-  ro.observe(header);
+  if (header) ro.observe(header);
+  syncSpacer();
 
+  // ── Logo collapse on scroll ───────────────────────────────────────────────
+  const logoLink = document.getElementById('header-logo-link');
+  const logoImg  = document.getElementById('header-logo-img');
+  const THRESHOLD = 40;
   let scrolled = false;
-  // Single threshold — no hysteresis needed because scrollY is now stable
-  const THRESHOLD = 60;
 
-  function collapse() {
-    plaque.style.maxHeight        = '0px';
-    plaque.style.paddingTop       = '0px';
-    plaque.style.paddingBottom    = '0px';
-    strip.style.maxHeight         = '0px';
-    announce.style.maxHeight      = '0px';
-    inlineLogo.style.opacity      = '1';
-    inlineLogo.style.pointerEvents = 'auto';
-    inlineLogo.removeAttribute('aria-hidden');
-    inlineLogo.tabIndex = 0;
-    header.style.boxShadow = '0 2px 20px rgba(0,0,0,0.35)';
+  function collapseHeader() {
+    if (logoLink) logoLink.style.top = '13px'; // centres 36px logo in 62px bar
+    if (logoImg)  logoImg.style.height = '2.25rem';
   }
 
-  function restore() {
-    plaque.style.maxHeight        = '160px';
-    plaque.style.paddingTop       = '';
-    plaque.style.paddingBottom    = '';
-    strip.style.maxHeight         = '28px';
-    announce.style.maxHeight      = '36px';
-    inlineLogo.style.opacity      = '0';
-    inlineLogo.style.pointerEvents = 'none';
-    inlineLogo.setAttribute('aria-hidden', 'true');
-    inlineLogo.tabIndex = -1;
-    header.style.boxShadow = '';
+  function restoreHeader() {
+    if (logoLink) logoLink.style.top = '12px'; // 20% of 62px nav bar
+    if (logoImg)  logoImg.style.height = '7rem'; // h-28
   }
 
   function onScroll() {
     const y = window.scrollY;
-    if (!scrolled && y > THRESHOLD) { scrolled = true;  collapse(); }
-    else if (scrolled && y <= THRESHOLD) { scrolled = false; restore(); }
+    if (!scrolled && y > THRESHOLD)  { scrolled = true;  collapseHeader(); syncSpacer(); }
+    else if (scrolled && y <= THRESHOLD) { scrolled = false; restoreHeader();  syncSpacer(); }
   }
 
-  // Initial state
-  syncSpacer();
-  if (window.scrollY > THRESHOLD) { scrolled = true; collapse(); }
-
+  if (window.scrollY > THRESHOLD) { scrolled = true; collapseHeader(); }
   window.addEventListener('scroll', onScroll, { passive: true });
 
-  // ── Mobile menu toggle ────────────────────────────────────────────────────
+  // ── Rotating announcement text ───────────────────────────────────────────
+  const msgs = announcements[lang];
+  let idx = 0;
+  const el = document.getElementById('announcement-text');
+  if (el && msgs.length > 1) {
+    setInterval(() => {
+      el.style.opacity = '0';
+      setTimeout(() => {
+        idx = (idx + 1) % msgs.length;
+        el.textContent = msgs[idx];
+        el.style.opacity = '1';
+      }, 500);
+    }, 4000);
+  }
+
+  // ── Mobile menu toggle ───────────────────────────────────────────────────
   const toggle    = document.getElementById('nav-toggle');
   const menu      = document.getElementById('mobile-nav');
   const iconOpen  = document.getElementById('icon-open');
