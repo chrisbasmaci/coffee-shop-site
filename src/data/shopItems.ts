@@ -103,11 +103,15 @@ function readBestShopierImage(html: string): string | undefined {
 
 async function fetchShopierMetadata(url: string): Promise<ShopierMetadata> {
   try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
     const response = await fetch(url, {
       headers: {
         'user-agent': 'Mozilla/5.0 (compatible; CiniliCafeBot/1.0)'
-      }
+      },
+      signal: controller.signal,
     });
+    clearTimeout(timer);
 
     if (!response.ok) {
       return {};
@@ -292,6 +296,16 @@ const shopItemSeeds: ShopItemSeed[] = [
   {
     id: 'cini-tile-1',
     category: 'tiles',
+    title: { tr: 'El Yapımı Çini Tabak Altlığı', en: 'Handmade Çini Tile Coaster Set' },
+    description: {
+      tr: 'Geleneksel Kütahya çinisi tekniğiyle üretilmiş altılı seramik tabak altlığı seti.',
+      en: 'Set of six ceramic coasters crafted using traditional Kütahya çini technique.',
+    },
+    details: { tr: ["6'lı set", 'El boyaması', 'Seramik'], en: ['Set of 6', 'Hand-painted', 'Ceramic'] },
+    price: '',
+    badge: { tr: 'El Yapımı', en: 'Handmade' },
+    featured: true,
+    image: '/images/shop/cini_altili_low.png',
     externalUrl: 'https://www.shopier.com/kachtiles/47511176',
   },
 
@@ -299,6 +313,16 @@ const shopItemSeeds: ShopItemSeed[] = [
   {
     id: 'kilim-1',
     category: 'kilims',
+    title: { tr: 'El Dokuma Kilim', en: 'Hand-Woven Kilim' },
+    description: {
+      tr: 'Anadolu motifli, yün iplikle elle dokunmuş otantik kilim.',
+      en: 'Authentic hand-woven kilim with Anatolian motifs in wool yarn.',
+    },
+    details: { tr: ['Yün', 'El dokuması', 'Anadolu motifi'], en: ['Wool', 'Hand-woven', 'Anatolian motif'] },
+    price: '',
+    badge: null,
+    featured: false,
+    image: '/images/shop/kilim_label.png',
     externalUrl: 'https://www.shopier.com/kachtiles/47511157',
   },
 
@@ -306,6 +330,16 @@ const shopItemSeeds: ShopItemSeed[] = [
   {
     id: 'hali-1',
     category: 'carpets',
+    title: { tr: 'El Dokuma Halı', en: 'Hand-Woven Carpet' },
+    description: {
+      tr: 'Geleneksel Türk halı sanatından ilham alınarak üretilmiş el dokuma halı.',
+      en: 'Hand-woven carpet inspired by traditional Turkish carpet art.',
+    },
+    details: { tr: ['Yün', 'El dokuması'], en: ['Wool', 'Hand-woven'] },
+    price: '',
+    badge: null,
+    featured: false,
+    image: '/images/shop/carpet-1.jpg',
     externalUrl: 'https://www.shopier.com/kachtiles/47504008',
   },
 
@@ -313,6 +347,16 @@ const shopItemSeeds: ShopItemSeed[] = [
   {
     id: 'textile-1',
     category: 'textiles',
+    title: { tr: 'Bellusch Altılı Set', en: 'Bellusch Six-Piece Set' },
+    description: {
+      tr: 'El işlemeli, özel tasarım tekstil ürün seti.',
+      en: 'Hand-embroidered special design textile product set.',
+    },
+    details: { tr: ["6'lı set", 'El işlemesi'], en: ['Set of 6', 'Hand-embroidered'] },
+    price: '',
+    badge: null,
+    featured: false,
+    image: '/images/shop/bellusch_altili_label.png',
     externalUrl: 'https://www.shopier.com/kachtiles/47511448',
   },
 ];
