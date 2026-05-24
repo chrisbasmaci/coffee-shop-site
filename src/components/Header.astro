@@ -39,32 +39,20 @@ const announcement = lang === 'tr'
     style="max-height: 120px;"
     aria-hidden="false"
   >
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center py-5">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center py-4">
       <a
         href={`/${lang}/`}
-        class="flex flex-col items-center gap-1 group"
+        class="group"
         aria-label="CiniliCafe – Ana Sayfa"
         tabindex="0"
       >
-        <!-- Decorative crest ring -->
-        <div class="relative flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20
-                    rounded-full border-2 border-caramel/60 group-hover:border-caramel
-                    transition-colors duration-300">
-          <!-- Inner ring -->
-          <div class="absolute inset-2 rounded-full border border-caramel/25"></div>
-          <!-- Monogram -->
-          <span class="font-serif text-3xl sm:text-4xl text-caramel leading-none select-none"
-                aria-hidden="true">ç</span>
-        </div>
-        <!-- Wordmark -->
-        <span class="font-serif text-lg sm:text-xl tracking-[0.18em] uppercase text-cream/90
-                     group-hover:text-cream transition-colors duration-300 mt-1">
-          CiniliCafe
-        </span>
-        <!-- Sub-line -->
-        <span class="text-[10px] tracking-[0.3em] uppercase text-caramel/60 font-sans">
-          Istanbul
-        </span>
+        <img
+          src="/images/logo.png"
+          alt="Çinili"
+          class="h-14 sm:h-16 w-auto object-contain drop-shadow-md
+                 group-hover:opacity-90 transition-opacity duration-300"
+          loading="eager"
+        />
       </a>
     </div>
   </div>
@@ -80,12 +68,16 @@ const announcement = lang === 'tr'
       <a
         id="nav-inline-logo"
         href={`/${lang}/`}
-        class="font-serif tracking-[0.15em] uppercase text-cream/0 text-sm
-               transition-all duration-500 pointer-events-none select-none whitespace-nowrap"
+        class="opacity-0 transition-all duration-500 pointer-events-none shrink-0"
         aria-hidden="true"
         tabindex="-1"
       >
-        CiniliCafe
+        <img
+          src="/images/logo.png"
+          alt="Çinili"
+          class="h-7 w-auto object-contain"
+          loading="eager"
+        />
       </a>
 
       <!-- Desktop links — centred -->
@@ -209,7 +201,7 @@ const announcement = lang === 'tr'
       strip.style.maxHeight        = '0px';
       announcement.style.maxHeight = '0px';
       // Show inline logo
-      inlineLogo.style.color        = 'rgba(250,247,240,0.9)';
+      inlineLogo.style.opacity       = '1';
       inlineLogo.style.pointerEvents = 'auto';
       inlineLogo.removeAttribute('aria-hidden');
       inlineLogo.tabIndex = 0;
@@ -223,7 +215,7 @@ const announcement = lang === 'tr'
       strip.style.maxHeight        = '28px';
       announcement.style.maxHeight = '36px';
       // Hide inline logo
-      inlineLogo.style.color        = 'rgba(250,247,240,0)';
+      inlineLogo.style.opacity       = '0';
       inlineLogo.style.pointerEvents = 'none';
       inlineLogo.setAttribute('aria-hidden', 'true');
       inlineLogo.tabIndex = -1;
