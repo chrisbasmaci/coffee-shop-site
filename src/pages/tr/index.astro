@@ -7,10 +7,11 @@ import ShopItemCard from '../../components/ShopItemCard.astro';
 import { t } from '../../i18n/translations';
 import { siteInfo } from '../../data/siteInfo';
 import { menuPdfs } from '../../data/menuPdfs';
-import { shopItems } from '../../data/shopItems';
+import { getShopItems } from '../../data/shopItems';
 
 const tr = t.tr;
 const h = tr.home;
+const shopItems = await getShopItems();
 ---
 
 <BaseLayout title={h.meta.title} description={h.meta.description} lang="tr" currentPage="home">
@@ -59,12 +60,13 @@ const h = tr.home;
               alt=""
               aria-hidden="true"
               class="absolute inset-0 w-full h-full object-cover"
+              style="filter: brightness(1.12) contrast(0.95)"
               loading="lazy"
             />
-            <div class="relative z-10 flex flex-col items-center justify-center h-full p-4 sm:p-6 text-center">
-              <span class="text-3xl block mb-3" aria-hidden="true">{item.icon}</span>
-              <h3 class="font-serif text-espresso font-semibold text-base mb-2">{item.title}</h3>
-              <p class="text-ink/70 text-xs sm:text-sm leading-relaxed">{item.desc}</p>
+            <div class="relative z-10 flex flex-col items-center justify-start h-full pt-10 px-4 sm:px-5 pb-16 text-center">
+              <h3 class="font-serif font-bold text-lg sm:text-xl mb-2 w-full" style="color:#6f3b0c">{item.title}</h3>
+              <p class="text-sm sm:text-base leading-relaxed w-full" style="color:#111111;font-weight:500;letter-spacing:0.01em;-webkit-text-stroke:0.3px white;paint-order:stroke fill">{item.desc}</p>
+              <span class="text-3xl absolute bottom-4" aria-hidden="true">{item.icon}</span>
             </div>
           </div>
         ))}
@@ -113,15 +115,7 @@ const h = tr.home;
       />
       <div class="grid sm:grid-cols-3 gap-5 mb-10">
         {shopItems.slice(0, 3).map(item => (
-          <ShopItemCard
-            title={item.title.tr}
-            description={item.description.tr}
-            price={item.price}
-            badge={item.badge?.tr}
-            image={item.image}
-            externalUrl={item.externalUrl}
-            viewLabel={tr.shop.viewLabel}
-          />
+          <ShopItemCard item={item} lang="tr" />
         ))}
       </div>
       <div class="text-center">

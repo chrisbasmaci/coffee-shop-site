@@ -69,6 +69,8 @@ export const t = {
         coffee: 'Kahve',
         tiles: 'Çini',
         carpets: 'Halı',
+        kilims: 'Kilim',
+        textiles: 'Tekstil',
       },
     },
     contact: {
@@ -162,6 +164,8 @@ export const t = {
         coffee: 'Coffee',
         tiles: 'Tiles',
         carpets: 'Carpets',
+        kilims: 'Kilims',
+        textiles: 'Textiles',
       },
     },
     contact: {

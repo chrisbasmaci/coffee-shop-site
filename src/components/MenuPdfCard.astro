@@ -11,28 +11,42 @@ interface Props {
 const { icon, title, description, pdfUrl, openLabel, note } = Astro.props;
 ---
 
-<article class="bg-cream border border-warm-border rounded-xl p-8 flex flex-col gap-4 hover:shadow-sm transition-shadow">
-  <div class="flex items-center gap-3">
-    <span class="text-3xl leading-none" aria-hidden="true">{icon}</span>
-    <h2 class="font-serif text-2xl text-espresso font-semibold">{title}</h2>
-  </div>
+<article class="relative rounded-xl overflow-hidden hover:shadow-sm transition-shadow">
 
-  <p class="text-sand text-sm leading-relaxed flex-1">{description}</p>
+  <!-- Ornate border frame — sets the card's natural aspect ratio -->
+  <img
+    src="/images/bordercop.png"
+    alt=""
+    aria-hidden="true"
+    class="w-full h-auto block pointer-events-none select-none"
+    loading="lazy"
+  />
 
-  <div class="flex flex-col gap-1.5">
-    <a
-      href={pdfUrl}
-      target="_blank"
-      rel="noopener"
-      class="inline-flex items-center gap-2 text-sm font-medium text-caramel hover:text-caramel/70 transition-colors self-start"
-    >
-      <!-- Download icon -->
-      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M12 10v6m0 0l-3-3m3 3l3-3M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1" />
-      </svg>
-      {openLabel}
-    </a>
-    {note && <p class="text-xs text-sand/60">{note}</p>}
+  <!-- Content overlaid inside the white centre -->
+  <div class="absolute inset-0 z-10 flex flex-col justify-between px-[16%] pt-[15%] pb-[20%] overflow-hidden">
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl leading-none" aria-hidden="true">{icon}</span>
+        <h2 class="font-serif text-2xl text-espresso font-semibold">{title}</h2>
+      </div>
+      <p class="text-sand text-sm leading-relaxed line-clamp-3">{description}</p>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <a
+        href={pdfUrl}
+        target="_blank"
+        rel="noopener"
+        class="inline-flex items-center gap-2 text-sm font-medium text-caramel hover:text-caramel/70 transition-colors self-start"
+      >
+        <!-- Download icon -->
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 10v6m0 0l-3-3m3 3l3-3M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1" />
+        </svg>
+        {openLabel}
+      </a>
+      {note && <p class="text-xs text-sand/60">{note}</p>}
+    </div>
   </div>
 </article>

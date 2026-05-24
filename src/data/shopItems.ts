@@ -1,17 +1,201 @@
-export type ShopCategory = 'coffee' | 'tiles' | 'carpets';
+export type ShopCategory = 'coffee' | 'tiles' | 'carpets' | 'kilims' | 'textiles';
+
+type LocalizedText = { tr: string; en: string };
 
 export interface ShopItem {
   id: string;
   category: ShopCategory;
-  title: { tr: string; en: string };
-  description: { tr: string; en: string };
+  title: LocalizedText;
+  description: LocalizedText;
+  details: { tr: string[]; en: string[] };
   price: string;
-  badge: { tr: string; en: string } | null;
+  badge: LocalizedText | null;
+  featured: boolean;
   image: string;
   externalUrl: string;
 }
 
-export const shopItems: ShopItem[] = [
+interface ShopItemSeed {
+  id: string;
+  category: ShopCategory;
+  title?: LocalizedText;
+  description?: LocalizedText;
+  details?: { tr: string[]; en: string[] };
+  price?: string;
+  badge?: LocalizedText | null;
+  featured?: boolean;
+  image?: string;
+  externalUrl: string;
+}
+
+interface ShopierMetadata {
+  title?: string;
+  description?: string;
+  price?: string;
+  image?: string;
+}
+
+const SHOPIER_HOST = 'shopier.com';
+
+function isShopierUrl(url: string): boolean {
+  if (!url || url === '#') return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname.includes(SHOPIER_HOST);
+  } catch {
+    return false;
+  }
+}
+
+function decodeHtml(input: string): string {
+  return input
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .trim();
+}
+
+function readMetaContent(html: string, key: string): string | undefined {
+  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const withProperty = new RegExp(`<meta[^>]+property=["']${escapedKey}["'][^>]+content=["']([^"']+)["'][^>]*>`, 'i');
+  const withName = new RegExp(`<meta[^>]+name=["']${escapedKey}["'][^>]+content=["']([^"']+)["'][^>]*>`, 'i');
+  const propertyMatch = html.match(withProperty);
+  const nameMatch = html.match(withName);
+  const value = propertyMatch?.[1] ?? nameMatch?.[1];
+  return value ? decodeHtml(value) : undefined;
+}
+
+function readPriceFromHtml(html: string): string | undefined {
+  const schemaPrice = html.match(/"price"\s*:\s*"([0-9.,]+)"/i)?.[1];
+  if (schemaPrice) {
+    return `${schemaPrice} TL`;
+  }
+
+  const rawPrice = html.match(/([0-9][0-9.,]*)\s*TL/i)?.[1];
+  if (rawPrice) {
+    return `${rawPrice} TL`;
+  }
+
+  return undefined;
+}
+
+function readBestShopierImage(html: string): string | undefined {
+  // Prefer the gallery full-size source, which matches the expanded image in Shopier's viewer.
+  const originalFromDataSrc = html.match(/class=["'][^"']*js-product-image-slide[^"']*["'][^>]*\sdata-src=["']([^"']+)["']/i)?.[1];
+  if (originalFromDataSrc) {
+    return decodeHtml(originalFromDataSrc);
+  }
+
+  const scaledOriginal = html.match(/https:\/\/cdn\.shopier\.app\/scaledoriginal\/[^"'\s>]+/i)?.[0];
+  if (scaledOriginal) {
+    return decodeHtml(scaledOriginal);
+  }
+
+  const largePicture = html.match(/https:\/\/cdn\.shopier\.app\/pictures_large\/[^"'\s>]+/i)?.[0];
+  if (largePicture) {
+    return decodeHtml(largePicture);
+  }
+
+  return undefined;
+}
+
+async function fetchShopierMetadata(url: string): Promise<ShopierMetadata> {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'user-agent': 'Mozilla/5.0 (compatible; CiniliCafeBot/1.0)'
+      }
+    });
+
+    if (!response.ok) {
+      return {};
+    }
+
+    const html = await response.text();
+    const title = readMetaContent(html, 'og:title') ?? readMetaContent(html, 'twitter:title');
+    const description = readMetaContent(html, 'og:description') ?? readMetaContent(html, 'description');
+    const image = readBestShopierImage(html)
+      ?? readMetaContent(html, 'og:image')
+      ?? readMetaContent(html, 'twitter:image');
+    const price = readPriceFromHtml(html);
+
+    return {
+      title,
+      description,
+      image,
+      price,
+    };
+  } catch {
+    return {};
+  }
+}
+
+function localize(value?: string): LocalizedText | undefined {
+  if (!value) return undefined;
+  return { tr: value, en: value };
+}
+
+function pickLocalized(preferred?: LocalizedText, fallback?: LocalizedText, defaultValue = ''): LocalizedText {
+  if (preferred && preferred.tr && preferred.en) {
+    return preferred;
+  }
+
+  if (preferred && (preferred.tr || preferred.en)) {
+    return {
+      tr: preferred.tr || preferred.en || defaultValue,
+      en: preferred.en || preferred.tr || defaultValue,
+    };
+  }
+
+  if (fallback) {
+    return fallback;
+  }
+
+  return { tr: defaultValue, en: defaultValue };
+}
+
+function normalizeDetails(details?: { tr: string[]; en: string[] }): { tr: string[]; en: string[] } {
+  return {
+    tr: details?.tr ?? [],
+    en: details?.en ?? [],
+  };
+}
+
+async function enrichItem(seed: ShopItemSeed): Promise<ShopItem> {
+  const hasShopierLink = isShopierUrl(seed.externalUrl);
+  const shopierData = hasShopierLink
+    ? await fetchShopierMetadata(seed.externalUrl)
+    : {};
+
+  const title = hasShopierLink
+    ? pickLocalized(localize(shopierData.title), seed.title, 'Urun')
+    : pickLocalized(seed.title, undefined, 'Urun');
+
+  const description = hasShopierLink
+    ? pickLocalized(localize(shopierData.description), seed.description, '')
+    : pickLocalized(seed.description, undefined, '');
+
+  return {
+    id: seed.id,
+    category: seed.category,
+    title,
+    description,
+    details: normalizeDetails(seed.details),
+    price: hasShopierLink
+      ? (shopierData.price ?? seed.price ?? '')
+      : (seed.price ?? ''),
+    badge: seed.badge ?? null,
+    featured: seed.featured ?? false,
+    image: hasShopierLink
+      ? (shopierData.image ?? seed.image ?? '')
+      : (seed.image ?? ''),
+    externalUrl: seed.externalUrl,
+  };
+}
+
+const shopItemSeeds: ShopItemSeed[] = [
   // ── Coffee ───────────────────────────────────────────────────────────────
   {
     id: 'espresso-blend',
@@ -21,8 +205,10 @@ export const shopItems: ShopItem[] = [
       tr: 'İmza harmanımız. Yoğun aroma, kadifemsi doku.',
       en: 'Our signature blend. Rich aroma, velvety texture.',
     },
+    details: { tr: ['250 g', 'Çekirdek veya öğütülmüş'], en: ['250 g', 'Whole bean or ground'] },
     price: '₺180',
     badge: { tr: 'Çok Satan', en: 'Best Seller' },
+    featured: true,
     image: '/images/shop/espresso-blend.jpg',
     externalUrl: '#',
   },
@@ -34,8 +220,10 @@ export const shopItems: ShopItem[] = [
       tr: 'Geleneksel yöntemlerle öğütülmüş ince çekim Türk kahvesi.',
       en: 'Finely ground Turkish coffee, prepared with traditional methods.',
     },
+    details: { tr: ['200 g', 'İnce öğütülmüş'], en: ['200 g', 'Finely ground'] },
     price: '₺150',
     badge: null,
+    featured: false,
     image: '/images/shop/turkish-coffee.jpg',
     externalUrl: '#',
   },
@@ -47,8 +235,10 @@ export const shopItems: ShopItem[] = [
       tr: 'Farklı menşeilerden tek orijinli filtre kahveler.',
       en: 'Single-origin filter coffees from different regions.',
     },
+    details: { tr: ['Aylık değişen menşei', 'Çekirdek veya öğütülmüş'], en: ['Monthly origin rotation', 'Whole bean or ground'] },
     price: '₺200',
     badge: { tr: 'Aylık Değişir', en: 'Monthly Rotation' },
+    featured: false,
     image: '/images/shop/filter-coffee.jpg',
     externalUrl: '#',
   },
@@ -60,8 +250,10 @@ export const shopItems: ShopItem[] = [
       tr: 'El boyaması çini desenli 300ml seramik kupa.',
       en: 'Hand-painted çini-patterned 300ml ceramic mug.',
     },
+    details: { tr: ['Seramik', '300 ml', 'Sınırlı stok'], en: ['Ceramic', '300 ml', 'Limited stock'] },
     price: '₺320',
     badge: { tr: 'El Yapımı', en: 'Handmade' },
+    featured: true,
     image: '/images/shop/mug.jpg',
     externalUrl: '#',
   },
@@ -73,160 +265,68 @@ export const shopItems: ShopItem[] = [
       tr: 'Özel harman çay, ada çayı ve meyve çayı ikili seti.',
       en: 'Specialty blend tea, sage tea and fruit infusion duo set.',
     },
+    details: { tr: ['İkili set', 'Özel paketleme'], en: ['Duo set', 'Special packaging'] },
     price: '₺120',
     badge: null,
+    featured: false,
     image: '/images/shop/tea.jpg',
     externalUrl: '#',
   },
   {
     id: 'gift-set',
     category: 'coffee',
-    title: { tr: 'Hediye Seti', en: 'Gift Set' },
+    title: { tr: 'Kahve Hediye Kutusu', en: 'Coffee Gift Box' },
     description: {
       tr: 'Espresso harman, kupa ve kahve ölçeği hediye kutusu.',
       en: 'Espresso blend, mug and coffee scoop gift box.',
     },
+    details: { tr: ['Özel paketleme', 'Siparişle hazırlanır'], en: ['Special packaging', 'Prepared on order'] },
     price: '₺580',
     badge: { tr: 'Hediye', en: 'Gift' },
+    featured: true,
     image: '/images/shop/gift-set.jpg',
     externalUrl: '#',
   },
 
   // ── Tiles / Çini ─────────────────────────────────────────────────────────
   {
-    id: 'iznik-plate',
+    id: 'cini-tile-1',
     category: 'tiles',
-    title: { tr: 'İznik Çini Tabak', en: 'Iznik Ceramic Plate' },
-    description: {
-      tr: '20 cm el boyaması geleneksel İznik desenli dekoratif çini tabak.',
-      en: '20 cm hand-painted decorative plate with traditional Iznik patterns.',
-    },
-    price: '₺480',
-    badge: { tr: 'El Yapımı', en: 'Handmade' },
-    image: '/images/shop/iznik-plate.jpg',
-    externalUrl: '#',
+    externalUrl: 'https://www.shopier.com/kachtiles/47511176',
   },
+
+  // ── Kilims ────────────────────────────────────────────────────────────────
   {
-    id: 'ottoman-tile-set',
-    category: 'tiles',
-    title: { tr: 'Osmanlı Desen Karo Seti', en: 'Ottoman Pattern Tile Set' },
-    description: {
-      tr: '6 parça el yapımı Osmanlı çiçek desenli dekoratif duvar karosu.',
-      en: 'Set of 6 hand-crafted decorative wall tiles with Ottoman floral motifs.',
-    },
-    price: '₺650',
-    badge: null,
-    image: '/images/shop/ottoman-tiles.jpg',
-    externalUrl: '#',
-  },
-  {
-    id: 'cini-vase',
-    category: 'tiles',
-    title: { tr: 'Çiçek Desenli Vazo', en: 'Floral Pattern Vase' },
-    description: {
-      tr: 'Türk çini geleneğinden ilham alan el boyaması seramik vazo.',
-      en: 'Hand-painted ceramic vase inspired by traditional Turkish çini art.',
-    },
-    price: '₺380',
-    badge: { tr: 'Yeni', en: 'New' },
-    image: '/images/shop/cini-vase.jpg',
-    externalUrl: '#',
-  },
-  {
-    id: 'blue-cini-bowl',
-    category: 'tiles',
-    title: { tr: 'Mavi Çini Kase', en: 'Blue Çini Bowl' },
-    description: {
-      tr: 'Geleneksel kobalt mavisi ile boyalı, 18 cm çaplı çini kase.',
-      en: 'Traditional cobalt blue 18 cm ceramic bowl, hand-crafted.',
-    },
-    price: '₺290',
-    badge: null,
-    image: '/images/shop/blue-bowl.jpg',
-    externalUrl: '#',
-  },
-  {
-    id: 'mini-tile-set',
-    category: 'tiles',
-    title: { tr: 'Mini Çini Set', en: 'Mini Tile Set' },
-    description: {
-      tr: '3 parça küçük dekoratif çini, çerçeveli duvar süsü olarak sunulur.',
-      en: 'Set of 3 small decorative tiles, presented in frames for wall display.',
-    },
-    price: '₺320',
-    badge: { tr: 'Hediyelik', en: 'Gift Idea' },
-    image: '/images/shop/mini-tiles.jpg',
-    externalUrl: '#',
+    id: 'kilim-1',
+    category: 'kilims',
+    externalUrl: 'https://www.shopier.com/kachtiles/47511157',
   },
 
   // ── Carpets / Halı ────────────────────────────────────────────────────────
   {
-    id: 'anatolian-kilim',
+    id: 'hali-1',
     category: 'carpets',
-    title: { tr: 'Anadolu Kilimi', en: 'Anatolian Kilim' },
-    description: {
-      tr: '120×180 cm el dokuması geleneksel Anadolu kilimi.',
-      en: '120×180 cm hand-woven traditional Anatolian kilim.',
-    },
-    price: '₺2.400',
-    badge: null,
-    image: '/images/shop/kilim-1.jpg',
-    externalUrl: '#',
+    externalUrl: 'https://www.shopier.com/kachtiles/47504008',
   },
+
+  // ── Textiles ──────────────────────────────────────────────────────────────
   {
-    id: 'silk-prayer-rug',
-    category: 'carpets',
-    title: { tr: 'İpek Seccade', en: 'Silk Prayer Rug' },
-    description: {
-      tr: 'El dokuması ipek seccade, zarif çiçek desenli.',
-      en: 'Hand-woven silk prayer rug with elegant floral patterns.',
-    },
-    price: '₺1.800',
-    badge: { tr: 'Özel', en: 'Special' },
-    image: '/images/shop/prayer-rug.jpg',
-    externalUrl: '#',
-  },
-  {
-    id: 'turkmen-rug',
-    category: 'carpets',
-    title: { tr: 'Türkmen Halı', en: 'Turkmen Rug' },
-    description: {
-      tr: '90×150 cm geleneksel Türkmen dokuma halısı, doğal boyalar.',
-      en: '90×150 cm traditional Turkmen woven rug with natural dyes.',
-    },
-    price: '₺3.200',
-    badge: { tr: 'El Dokuması', en: 'Hand-Woven' },
-    image: '/images/shop/turkmen-rug.jpg',
-    externalUrl: '#',
-  },
-  {
-    id: 'small-kilim',
-    category: 'carpets',
-    title: { tr: 'Minik Kilim', en: 'Small Kilim' },
-    description: {
-      tr: '60×90 cm dekoratif küçük kilim, masa veya duvar için ideal.',
-      en: '60×90 cm small decorative kilim, ideal as a table or wall piece.',
-    },
-    price: '₺950',
-    badge: null,
-    image: '/images/shop/small-kilim.jpg',
-    externalUrl: '#',
-  },
-  {
-    id: 'ram-horn-kilim',
-    category: 'carpets',
-    title: { tr: 'Koçboynuzu Kilim', en: 'Ram Horn Kilim' },
-    description: {
-      tr: 'Koçboynuzu motifli 80×120 cm yün kilim. Güç ve bereket sembolü.',
-      en: '80×120 cm wool kilim with ram horn motif — a symbol of strength.',
-    },
-    price: '₺1.400',
-    badge: { tr: 'Yeni', en: 'New' },
-    image: '/images/shop/ramhorn-kilim.jpg',
-    externalUrl: '#',
+    id: 'textile-1',
+    category: 'textiles',
+    externalUrl: 'https://www.shopier.com/kachtiles/47511448',
   },
 ];
 
-export function getItemsByCategory(category: ShopCategory): ShopItem[] {
-  return shopItems.filter(item => item.category === category);
+let shopItemsCache: Promise<ShopItem[]> | null = null;
+
+export async function getShopItems(): Promise<ShopItem[]> {
+  if (!shopItemsCache) {
+    shopItemsCache = Promise.all(shopItemSeeds.map(item => enrichItem(item)));
+  }
+  return shopItemsCache;
+}
+
+export async function getItemsByCategory(category: ShopCategory): Promise<ShopItem[]> {
+  const items = await getShopItems();
+  return items.filter(item => item.category === category);
 }

@@ -3,43 +3,48 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import ShopItemCard from '../../components/ShopItemCard.astro';
 import Carousel3D from '../../components/Carousel3D.astro';
 import { t } from '../../i18n/translations';
-import { getItemsByCategory } from '../../data/shopItems';
+import { getShopItems } from '../../data/shopItems';
 
 const page = t.tr.shop;
 const cats = page.categories;
-const coffeeItems = getItemsByCategory('coffee');
-const tileItems   = getItemsByCategory('tiles');
-const carpetItems = getItemsByCategory('carpets');
+const allItems = await getShopItems();
+const coffeeItems = allItems.filter(item => item.category === 'coffee');
+const tileItems   = allItems.filter(item => item.category === 'tiles');
+const carpetItems  = allItems.filter(item => item.category === 'carpets');
+const kilimItems   = allItems.filter(item => item.category === 'kilims');
+const textileItems = allItems.filter(item => item.category === 'textiles');
 ---
 
 <BaseLayout title={page.meta.title} description={page.meta.description} lang="tr" currentPage="shop">
 
   <!-- Page header -->
-  <div class="bg-parchment border-b border-warm-border py-16 sm:py-20 px-4">
-    <div class="max-w-2xl mx-auto text-center">
-      <h1 class="font-serif text-4xl sm:text-5xl text-espresso font-semibold mb-4">{page.heading}</h1>
-      <p class="text-sand text-base sm:text-lg leading-relaxed mb-6">{page.intro}</p>
-      <span class="inline-block text-sm text-caramel bg-caramel/10 px-4 py-2 rounded-full">
+  <div class="relative border-b border-warm-border py-16 sm:py-20 px-4 overflow-hidden">
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image:url('/images/shop/shapmainback.jpg')"></div>
+    <div class="absolute inset-0 bg-espresso/60 backdrop-blur-[1px]"></div>
+    <div class="relative max-w-2xl mx-auto text-center">
+      <h1 class="font-serif text-4xl sm:text-5xl text-parchment font-semibold mb-4 drop-shadow-lg">{page.heading}</h1>
+      <p class="text-parchment/80 text-base sm:text-lg leading-relaxed mb-6 drop-shadow">{page.intro}</p>
+      <span class="inline-block text-sm text-parchment bg-white/10 border border-white/20 px-4 py-2 rounded-full backdrop-blur-sm">
         {page.orderNote}
       </span>
     </div>
   </div>
 
   <!-- Category tabs -->
-  <div class="sticky top-0 z-10 bg-cream border-b border-warm-border">
+  <div id="category-tabs" class="sticky top-0 z-10 bg-cream border-b border-warm-border" hidden>
     <div class="max-w-5xl mx-auto px-4 flex gap-1 py-3 overflow-x-auto">
       {([
-        { key: 'coffee',  label: cats.coffee },
-        { key: 'tiles',   label: cats.tiles  },
-        { key: 'carpets', label: cats.carpets },
+        { key: 'coffee',   label: cats.coffee   },
+        { key: 'tiles',    label: cats.tiles    },
+        { key: 'carpets',  label: cats.carpets  },
+        { key: 'kilims',   label: cats.kilims   },
+        { key: 'textiles', label: cats.textiles },
       ] as const).map(({ key, label }) => (
         <button
           class="flex-shrink-0 px-5 py-2 rounded-lg text-sm font-medium transition-colors"
           data-tab-btn={key}
           type="button"
-          style={key === 'coffee'
-            ? 'background:#2C1A0E;color:#FAF7F0;'
-            : 'background:transparent;color:#7A6655;border:1px solid #E0D4C4;'}
+          style="background:transparent;color:#7A6655;border:1px solid #E0D4C4;"
         >
           {label}
         </button>
@@ -47,20 +52,56 @@ const carpetItems = getItemsByCategory('carpets');
     </div>
   </div>
 
+  <!-- ── Kategori Seçici (varsayılan giriş) ── -->
+  <section data-tab-section="picker" class="py-14 px-4">
+    <div class="max-w-5xl mx-auto">
+      <div class="flex justify-center mb-10">
+        <img src="/images/shop/product_label.png" alt="Bir kategori seçin" class="max-h-36 object-contain [filter:drop-shadow(0_4px_12px_rgba(44,26,14,0.2))]">
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+        <button data-pick-category="coffee" type="button"
+          class="group flex flex-col items-center gap-3 cursor-pointer hover:-translate-y-1 transition-all duration-300">
+          <div class="w-full h-[270px] rounded-2xl bg-espresso group-hover:scale-105 transition-transform duration-500 [filter:drop-shadow(0_8px_24px_rgba(44,26,14,0.35))]"></div>
+          <span class="w-full text-center text-espresso font-serif text-base sm:text-lg font-semibold">{cats.coffee}</span>
+        </button>
+        <button data-pick-category="tiles" type="button"
+          class="group flex flex-col items-center gap-3 cursor-pointer hover:-translate-y-1 transition-all duration-300">
+          <div class="w-full h-[270px] flex items-center justify-center">
+            <img src="/images/shop/cini_altili_low.png" alt={cats.tiles} class="max-w-full max-h-full object-contain transition-all duration-300 group-hover:brightness-110 [filter:drop-shadow(0_8px_24px_rgba(44,26,14,0.3))]">
+          </div>
+          <span class="w-full text-center text-espresso font-serif text-base sm:text-lg font-semibold">{cats.tiles}</span>
+        </button>
+        <button data-pick-category="carpets" type="button"
+          class="group flex flex-col items-center gap-3 cursor-pointer hover:-translate-y-1 transition-all duration-300">
+          <div class="w-full h-[270px] flex items-center justify-center">
+            <img src="/images/shop/carpet_label.png" alt={cats.carpets} class="max-w-full max-h-full object-contain transition-all duration-300 group-hover:brightness-110 [filter:drop-shadow(0_8px_24px_rgba(44,26,14,0.3))]">
+          </div>
+          <span class="w-full text-center text-espresso font-serif text-base sm:text-lg font-semibold">{cats.carpets}</span>
+        </button>
+        <button data-pick-category="kilims" type="button"
+          class="group flex flex-col items-center gap-3 cursor-pointer hover:-translate-y-1 transition-all duration-300">
+          <div class="w-full h-[270px] flex items-center justify-center">
+            <img src="/images/shop/kilim_label.png" alt={cats.kilims} class="max-w-full max-h-full object-contain transition-all duration-300 group-hover:brightness-110 [filter:drop-shadow(0_8px_24px_rgba(44,26,14,0.3))]">
+          </div>
+          <span class="w-full text-center text-espresso font-serif text-base sm:text-lg font-semibold">{cats.kilims}</span>
+        </button>
+        <button data-pick-category="textiles" type="button"
+          class="group flex flex-col items-center gap-3 cursor-pointer hover:-translate-y-1 transition-all duration-300">
+          <div class="w-full h-[270px] flex items-center justify-center">
+            <img src="/images/shop/bellusch_altili_label.png" alt={cats.textiles} class="max-w-full max-h-full object-contain transition-all duration-300 group-hover:brightness-110 [filter:drop-shadow(0_8px_24px_rgba(44,26,14,0.3))]">
+          </div>
+          <span class="w-full text-center text-espresso font-serif text-base sm:text-lg font-semibold">{cats.textiles}</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
   <!-- ── Coffee section (grid) ── -->
-  <section data-tab-section="coffee" class="py-14 px-4">
+  <section data-tab-section="coffee" class="py-14 px-4" hidden>
     <div class="max-w-5xl mx-auto">
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {coffeeItems.map(item => (
-          <ShopItemCard
-            title={item.title.tr}
-            description={item.description.tr}
-            price={item.price}
-            badge={item.badge?.tr}
-            image={item.image}
-            externalUrl={item.externalUrl}
-            viewLabel={page.viewLabel}
-          />
+          <ShopItemCard item={item} lang="tr" />
         ))}
       </div>
     </div>
@@ -122,25 +163,88 @@ const carpetItems = getItemsByCategory('carpets');
     </div>
   </section>
 
+  <!-- ── Kilims bölümü (3D karusel) ── -->
+  <section data-tab-section="kilims" class="py-14 px-4" hidden>
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-10">
+        <p class="text-xs font-medium tracking-[0.2em] uppercase text-caramel mb-2">{cats.kilims}</p>
+        <h2 class="font-serif text-3xl sm:text-4xl text-espresso font-semibold">El Dokuması Kilimler</h2>
+        <p class="text-sand mt-3 max-w-md mx-auto text-sm leading-relaxed">
+          Anadolu'nun yüzyıllık dokuma geleneğinden gelen otantik düz dokuma kilimler.
+        </p>
+      </div>
+      <Carousel3D
+        carouselId="carousel-kilims-tr"
+        items={kilimItems.map(item => ({
+          id: item.id,
+          title: item.title.tr,
+          description: item.description.tr,
+          price: item.price,
+          badge: item.badge?.tr,
+          image: item.image,
+          externalUrl: item.externalUrl,
+        }))}
+        viewLabel={page.viewLabel}
+        prevLabel="Önceki"
+        nextLabel="Sonraki"
+      />
+    </div>
+  </section>
+
+  <!-- ── Tekstil bölümü (3D karusel) ── -->
+  <section data-tab-section="textiles" class="py-14 px-4" hidden>
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-10">
+        <p class="text-xs font-medium tracking-[0.2em] uppercase text-caramel mb-2">{cats.textiles}</p>
+        <h2 class="font-serif text-3xl sm:text-4xl text-espresso font-semibold">El Dokuması Tekstiller</h2>
+        <p class="text-sand mt-3 max-w-md mx-auto text-sm leading-relaxed">
+          Beluş ve Orta Asya dokuma tekstilleri — her parça benzersiz bir sanat eseri.
+        </p>
+      </div>
+      <Carousel3D
+        carouselId="carousel-textiles-tr"
+        items={textileItems.map(item => ({
+          id: item.id,
+          title: item.title.tr,
+          description: item.description.tr,
+          price: item.price,
+          badge: item.badge?.tr,
+          image: item.image,
+          externalUrl: item.externalUrl,
+        }))}
+        viewLabel={page.viewLabel}
+        prevLabel="Önceki"
+        nextLabel="Sonraki"
+      />
+    </div>
+  </section>
+
 </BaseLayout>
 
 <script>
   const tabs     = document.querySelectorAll<HTMLElement>('[data-tab-btn]');
   const sections = document.querySelectorAll<HTMLElement>('[data-tab-section]');
+  const tabBar   = document.getElementById('category-tabs') as HTMLElement;
+
+  function switchTo(key: string) {
+    tabBar.hidden = key === 'picker';
+    tabs.forEach(t => {
+      const active = t.dataset.tabBtn === key;
+      t.style.background = active ? '#2C1A0E' : 'transparent';
+      t.style.color      = active ? '#FAF7F0' : '#7A6655';
+      t.style.border     = active ? 'none' : '1px solid #E0D4C4';
+    });
+    sections.forEach(s => {
+      s.hidden = s.dataset.tabSection !== key;
+    });
+  }
 
   tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const target = tab.dataset.tabBtn!;
-      tabs.forEach(t => {
-        const active = t === tab;
-        t.style.background = active ? '#2C1A0E' : 'transparent';
-        t.style.color      = active ? '#FAF7F0' : '#7A6655';
-        t.style.border     = active ? 'none' : '1px solid #E0D4C4';
-      });
-      sections.forEach(s => {
-        s.hidden = s.dataset.tabSection !== target;
-      });
-    });
+    tab.addEventListener('click', () => switchTo(tab.dataset.tabBtn!));
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-pick-category]').forEach(card => {
+    card.addEventListener('click', () => switchTo(card.dataset.pickCategory!));
   });
 </script>
 
