@@ -1,0 +1,112 @@
+---
+import LanguageToggle from './LanguageToggle.astro';
+import { navigation } from '../data/navigation';
+import type { Lang } from '../i18n/translations';
+import type { PageKey } from '../data/navigation';
+
+interface Props {
+  lang: Lang;
+  currentPage: PageKey;
+}
+
+const { lang, currentPage } = Astro.props;
+const nav = navigation[lang];
+
+const links: { key: PageKey; label: string; href: string }[] = [
+  { key: 'home',    label: nav.home,    href: `/${lang}/` },
+  { key: 'menu',    label: nav.menu,    href: `/${lang}/menu` },
+  { key: 'shop',    label: nav.shop,    href: `/${lang}/shop` },
+  { key: 'contact', label: nav.contact, href: `/${lang}/contact` },
+];
+---
+
+<header class="sticky top-0 z-50 bg-cream/95 backdrop-blur-sm border-b border-warm-border">
+  <nav
+    class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16"
+    aria-label={lang === 'tr' ? 'Ana menü' : 'Main navigation'}
+  >
+    <!-- Logo -->
+    <a
+      href={`/${lang}/`}
+      class="font-serif text-xl font-semibold text-espresso tracking-wide hover:text-caramel transition-colors"
+      aria-label="CiniliCafe"
+    >
+      CiniliCafe
+    </a>
+
+    <!-- Desktop links -->
+    <ul class="hidden md:flex items-center gap-7" role="list">
+      {links.map(link => (
+        <li>
+          <a
+            href={link.href}
+            class:list={[
+              'text-sm font-medium transition-colors',
+              link.key === currentPage
+                ? 'text-caramel'
+                : 'text-ink/60 hover:text-ink',
+            ]}
+            aria-current={link.key === currentPage ? 'page' : undefined}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- Right: language toggle + hamburger -->
+    <div class="flex items-center gap-3">
+      <LanguageToggle lang={lang} currentPage={currentPage} />
+
+      <button
+        id="nav-toggle"
+        class="md:hidden p-1.5 text-espresso hover:text-caramel transition-colors rounded"
+        aria-label={lang === 'tr' ? 'Menüyü aç' : 'Open menu'}
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+      >
+        <svg id="icon-open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <svg id="icon-close" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div id="mobile-nav" class="hidden md:hidden border-t border-warm-border bg-cream">
+    <ul class="max-w-6xl mx-auto px-4 py-2 flex flex-col" role="list">
+      {links.map(link => (
+        <li>
+          <a
+            href={link.href}
+            class:list={[
+              'block py-3 text-sm font-medium border-b border-warm-border/50 last:border-0 transition-colors',
+              link.key === currentPage ? 'text-caramel' : 'text-ink/70 hover:text-caramel',
+            ]}
+            aria-current={link.key === currentPage ? 'page' : undefined}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</header>
+
+<script>
+  const toggle = document.getElementById('nav-toggle');
+  const menu = document.getElementById('mobile-nav');
+  const iconOpen = document.getElementById('icon-open');
+  const iconClose = document.getElementById('icon-close');
+
+  toggle?.addEventListener('click', () => {
+    const isOpen = !menu?.classList.contains('hidden');
+    menu?.classList.toggle('hidden', isOpen);
+    iconOpen?.classList.toggle('hidden', !isOpen);
+    iconClose?.classList.toggle('hidden', isOpen);
+    toggle.setAttribute('aria-expanded', String(!isOpen));
+  });
+</script>

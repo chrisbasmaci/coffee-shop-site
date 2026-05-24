@@ -1,0 +1,22 @@
+---
+import type { Lang } from '../i18n/translations';
+import type { PageKey } from '../data/navigation';
+
+interface Props {
+  lang: Lang;
+  currentPage: PageKey;
+}
+
+const { lang, currentPage } = Astro.props;
+const otherLang: Lang = lang === 'tr' ? 'en' : 'tr';
+const path = currentPage === 'home' ? '' : currentPage;
+const href = `/${otherLang}/${path}`;
+---
+
+<a
+  href={href}
+  class="text-xs font-semibold tracking-widest uppercase text-espresso/50 hover:text-caramel transition-colors border border-warm-border rounded px-2.5 py-1"
+  aria-label={`Switch to ${otherLang.toUpperCase()}`}
+>
+  {otherLang.toUpperCase()}
+</a>

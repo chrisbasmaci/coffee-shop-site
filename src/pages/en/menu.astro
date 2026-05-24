@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import MenuPdfCard from '../../components/MenuPdfCard.astro';
+import { t } from '../../i18n/translations';
+import { menuPdfs } from '../../data/menuPdfs';
+
+const page = t.en.menu;
+---
+
+<BaseLayout title={page.meta.title} description={page.meta.description} lang="en" currentPage="menu">
+
+  <div class="bg-parchment border-b border-warm-border py-16 sm:py-20 px-4">
+    <div class="max-w-2xl mx-auto text-center">
+      <h1 class="font-serif text-4xl sm:text-5xl text-espresso font-semibold mb-4">
+        {page.heading}
+      </h1>
+      <p class="text-sand text-base sm:text-lg leading-relaxed">{page.intro}</p>
+    </div>
+  </div>
+
+  <section class="py-16 px-4">
+    <div class="max-w-4xl mx-auto">
+      <div class="grid sm:grid-cols-2 gap-6">
+        {menuPdfs.map(pdf => (
+          <MenuPdfCard
+            icon={pdf.icon}
+            title={pdf.title.en}
+            description={pdf.description.en}
+            pdfUrl={pdf.pdfUrl.en}
+            openLabel={page.openLabel}
+            note={page.note}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>

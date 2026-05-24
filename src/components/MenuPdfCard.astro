@@ -1,0 +1,38 @@
+---
+interface Props {
+  icon: string;
+  title: string;
+  description: string;
+  pdfUrl: string;
+  openLabel: string;
+  note?: string;
+}
+
+const { icon, title, description, pdfUrl, openLabel, note } = Astro.props;
+---
+
+<article class="bg-cream border border-warm-border rounded-xl p-8 flex flex-col gap-4 hover:shadow-sm transition-shadow">
+  <div class="flex items-center gap-3">
+    <span class="text-3xl leading-none" aria-hidden="true">{icon}</span>
+    <h2 class="font-serif text-2xl text-espresso font-semibold">{title}</h2>
+  </div>
+
+  <p class="text-sand text-sm leading-relaxed flex-1">{description}</p>
+
+  <div class="flex flex-col gap-1.5">
+    <a
+      href={pdfUrl}
+      target="_blank"
+      rel="noopener"
+      class="inline-flex items-center gap-2 text-sm font-medium text-caramel hover:text-caramel/70 transition-colors self-start"
+    >
+      <!-- Download icon -->
+      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 10v6m0 0l-3-3m3 3l3-3M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1" />
+      </svg>
+      {openLabel}
+    </a>
+    {note && <p class="text-xs text-sand/60">{note}</p>}
+  </div>
+</article>

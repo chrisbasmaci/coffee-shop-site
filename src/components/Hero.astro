@@ -1,0 +1,51 @@
+---
+interface Props {
+  eyebrow: string;
+  headingLine1: string;
+  headingLine2: string;
+  subheading: string;
+  ctaPrimary: { text: string; href: string };
+  ctaSecondary: { text: string; href: string };
+}
+
+const { eyebrow, headingLine1, headingLine2, subheading, ctaPrimary, ctaSecondary } = Astro.props;
+---
+
+<section class="relative min-h-[90vh] flex items-center justify-center text-center px-4 py-24 bg-gradient-to-b from-cream to-parchment overflow-hidden">
+  <!-- Decorative rings -->
+  <div class="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+    <div class="w-[700px] h-[700px] rounded-full border border-caramel/8 absolute"></div>
+    <div class="w-[480px] h-[480px] rounded-full border border-caramel/10 absolute"></div>
+    <div class="w-[280px] h-[280px] rounded-full border border-caramel/12 absolute"></div>
+  </div>
+
+  <div class="relative z-10 max-w-3xl mx-auto">
+    <p class="text-caramel text-xs font-medium tracking-[0.25em] uppercase mb-5">
+      {eyebrow}
+    </p>
+
+    <h1 class="font-serif text-5xl sm:text-6xl md:text-7xl font-semibold text-espresso leading-[1.1] mb-6">
+      <span class="block">{headingLine1}</span>
+      <span class="block italic">{headingLine2}</span>
+    </h1>
+
+    <p class="text-base sm:text-lg text-sand max-w-xl mx-auto mb-10 leading-relaxed">
+      {subheading}
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <a
+        href={ctaPrimary.href}
+        class="inline-block bg-caramel text-cream text-sm font-medium px-8 py-3.5 rounded-md hover:bg-caramel/90 transition-colors"
+      >
+        {ctaPrimary.text}
+      </a>
+      <a
+        href={ctaSecondary.href}
+        class="inline-block border border-espresso/40 text-espresso text-sm font-medium px-8 py-3.5 rounded-md hover:bg-espresso hover:text-cream hover:border-espresso transition-colors"
+      >
+        {ctaSecondary.text}
+      </a>
+    </div>
+  </div>
+</section>

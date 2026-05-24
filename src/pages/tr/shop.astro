@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ShopItemCard from '../../components/ShopItemCard.astro';
+import { t } from '../../i18n/translations';
+import { shopItems } from '../../data/shopItems';
+
+const tr = t.tr;
+const page = tr.shop;
+---
+
+<BaseLayout title={page.meta.title} description={page.meta.description} lang="tr" currentPage="shop">
+
+  <!-- Page header -->
+  <div class="bg-parchment border-b border-warm-border py-16 sm:py-20 px-4">
+    <div class="max-w-2xl mx-auto text-center">
+      <h1 class="font-serif text-4xl sm:text-5xl text-espresso font-semibold mb-4">
+        {page.heading}
+      </h1>
+      <p class="text-sand text-base sm:text-lg leading-relaxed mb-6">{page.intro}</p>
+      <span class="inline-block text-sm text-caramel bg-caramel/10 px-4 py-2 rounded-full">
+        {page.orderNote}
+      </span>
+    </div>
+  </div>
+
+  <section class="py-16 px-4">
+    <div class="max-w-5xl mx-auto">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {shopItems.map(item => (
+          <ShopItemCard
+            title={item.title.tr}
+            description={item.description.tr}
+            price={item.price}
+            badge={item.badge?.tr}
+            image={item.image}
+            externalUrl={item.externalUrl}
+            viewLabel={page.viewLabel}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>

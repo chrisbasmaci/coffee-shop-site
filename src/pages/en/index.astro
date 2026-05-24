@@ -1,0 +1,147 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import MenuPdfCard from '../../components/MenuPdfCard.astro';
+import ShopItemCard from '../../components/ShopItemCard.astro';
+import { t } from '../../i18n/translations';
+import { siteInfo } from '../../data/siteInfo';
+import { menuPdfs } from '../../data/menuPdfs';
+import { shopItems } from '../../data/shopItems';
+
+const tr = t.en;
+const h = tr.home;
+---
+
+<BaseLayout title={h.meta.title} description={h.meta.description} lang="en" currentPage="home">
+
+  <Hero
+    eyebrow={h.hero.eyebrow}
+    headingLine1={h.hero.headingLine1}
+    headingLine2={h.hero.headingLine2}
+    subheading={h.hero.subheading}
+    ctaPrimary={{ text: h.hero.ctaMenu, href: '/en/menu' }}
+    ctaSecondary={{ text: h.hero.ctaContact, href: '/en/contact' }}
+  />
+
+  <!-- About -->
+  <section class="py-20 px-4">
+    <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+      <div>
+        <SectionHeading label={h.about.label} heading={h.about.heading} />
+        <p class="text-sand leading-relaxed text-base max-w-md -mt-4">{h.about.body}</p>
+      </div>
+      <div class="hidden md:flex items-center justify-center" aria-hidden="true">
+        <div class="relative w-64 h-64 lg:w-72 lg:h-72">
+          <div class="absolute inset-0 bg-parchment rounded-2xl border border-warm-border"></div>
+          <div class="absolute inset-5 border border-caramel/25 rounded-xl"></div>
+          <div class="absolute inset-10 border border-caramel/15 rounded-lg"></div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="font-serif text-9xl text-caramel/10 select-none leading-none">ç</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="max-w-6xl mx-auto px-4"><div class="h-px bg-warm-border"></div></div>
+
+  <!-- Highlight cards -->
+  <section class="py-20 px-4 bg-parchment">
+    <div class="max-w-6xl mx-auto">
+      <SectionHeading heading={h.highlights.heading} centered />
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {h.highlights.items.map(item => (
+          <div class="bg-cream border border-warm-border rounded-xl p-5 sm:p-6 text-center">
+            <span class="text-3xl block mb-3" aria-hidden="true">{item.icon}</span>
+            <h3 class="font-serif text-espresso font-semibold text-base mb-2">{item.title}</h3>
+            <p class="text-sand text-xs sm:text-sm leading-relaxed">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Menu preview -->
+  <section class="py-20 px-4">
+    <div class="max-w-6xl mx-auto">
+      <SectionHeading
+        heading={h.menuSection.heading}
+        subtitle={h.menuSection.subtitle}
+        centered
+      />
+      <div class="grid sm:grid-cols-2 gap-5 mb-10">
+        {menuPdfs.slice(0, 2).map(pdf => (
+          <MenuPdfCard
+            icon={pdf.icon}
+            title={pdf.title.en}
+            description={pdf.description.en}
+            pdfUrl={pdf.pdfUrl.en}
+            openLabel={t.en.menu.openLabel}
+            note={t.en.menu.note}
+          />
+        ))}
+      </div>
+      <div class="text-center">
+        <a
+          href="/en/menu"
+          class="inline-block border border-caramel text-caramel text-sm font-medium px-8 py-3 rounded-md hover:bg-caramel hover:text-cream transition-colors"
+        >
+          {h.menuSection.cta}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shop preview -->
+  <section class="py-20 px-4 bg-parchment">
+    <div class="max-w-6xl mx-auto">
+      <SectionHeading
+        heading={h.shopSection.heading}
+        subtitle={h.shopSection.subtitle}
+        centered
+      />
+      <div class="grid sm:grid-cols-3 gap-5 mb-10">
+        {shopItems.slice(0, 3).map(item => (
+          <ShopItemCard
+            title={item.title.en}
+            description={item.description.en}
+            price={item.price}
+            badge={item.badge?.en}
+            image={item.image}
+            externalUrl={item.externalUrl}
+            viewLabel={t.en.shop.viewLabel}
+          />
+        ))}
+      </div>
+      <div class="text-center">
+        <a
+          href="/en/shop"
+          class="inline-block bg-espresso text-cream text-sm font-medium px-8 py-3 rounded-md hover:bg-espresso/90 transition-colors"
+        >
+          {h.shopSection.cta}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Location strip -->
+  <section class="py-16 px-4 bg-espresso text-cream">
+    <div class="max-w-2xl mx-auto text-center">
+      <h2 class="font-serif text-2xl sm:text-3xl font-semibold mb-4">
+        {h.locationStrip.heading}
+      </h2>
+      <p class="text-cream/60 mb-2 text-sm sm:text-base">{siteInfo.address.en}</p>
+      <ul class="text-cream/50 text-sm mb-8 space-y-0.5">
+        {siteInfo.openingHours.en.map(row => <li>{row}</li>)}
+      </ul>
+      <a
+        href="/en/contact"
+        class="inline-block border border-cream/30 text-cream/80 text-sm font-medium px-8 py-3 rounded-md hover:bg-cream hover:text-espresso transition-colors"
+      >
+        {h.locationStrip.cta}
+      </a>
+    </div>
+  </section>
+
+</BaseLayout>

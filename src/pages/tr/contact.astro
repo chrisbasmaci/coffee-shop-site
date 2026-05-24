@@ -1,0 +1,104 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContactCard from '../../components/ContactCard.astro';
+import { t } from '../../i18n/translations';
+import { siteInfo } from '../../data/siteInfo';
+
+const tr = t.tr;
+const page = tr.contact;
+---
+
+<BaseLayout title={page.meta.title} description={page.meta.description} lang="tr" currentPage="contact">
+
+  <!-- Page header -->
+  <div class="bg-parchment border-b border-warm-border py-16 sm:py-20 px-4">
+    <div class="max-w-2xl mx-auto text-center">
+      <h1 class="font-serif text-4xl sm:text-5xl text-espresso font-semibold mb-4">
+        {page.heading}
+      </h1>
+      <p class="text-sand text-base sm:text-lg leading-relaxed">{page.intro}</p>
+    </div>
+  </div>
+
+  <section class="py-16 px-4">
+    <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-12 lg:gap-20">
+
+      <!-- Details -->
+      <div class="flex flex-col gap-8">
+        <ContactCard
+          label={page.labels.address}
+          value={siteInfo.address.tr}
+        />
+        <ContactCard
+          label={page.labels.phone}
+          value={siteInfo.phone}
+          href={`tel:${siteInfo.phone.replace(/\s/g, '')}`}
+        />
+        <ContactCard
+          label={page.labels.email}
+          value={siteInfo.email}
+          href={`mailto:${siteInfo.email}`}
+          multiline
+        />
+
+        <!-- Hours -->
+        <div>
+          <p class="text-xs font-medium tracking-[0.2em] uppercase text-caramel mb-3">
+            {page.labels.hours}
+          </p>
+          <ul class="text-sm space-y-2">
+            {siteInfo.openingHours.tr.map(row => (
+              <li class="text-ink">{row}</li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Social -->
+        <div>
+          <p class="text-xs font-medium tracking-[0.2em] uppercase text-caramel mb-3">
+            {page.labels.instagram}
+          </p>
+          <a
+            href={siteInfo.instagram}
+            target="_blank"
+            rel="noopener"
+            class="text-sm font-medium text-ink hover:text-caramel transition-colors"
+          >
+            @cinilikafe
+          </a>
+        </div>
+      </div>
+
+      <!-- Map -->
+      <div class="flex flex-col gap-4">
+        <!-- Replace this div with a real Google Maps <iframe> -->
+        <div
+          class="rounded-xl overflow-hidden border border-warm-border bg-parchment aspect-video flex flex-col items-center justify-center gap-3"
+          aria-label={page.mapPlaceholder}
+        >
+          <svg class="w-10 h-10 text-caramel/30" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <p class="text-sm text-sand/70">{page.mapPlaceholder}</p>
+        </div>
+
+        <a
+          href={siteInfo.mapsUrl}
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center gap-2 text-sm font-medium text-caramel hover:text-caramel/70 transition-colors self-start"
+        >
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+          {page.mapCta}
+        </a>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
