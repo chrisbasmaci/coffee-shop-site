@@ -36,10 +36,10 @@ const announcement = lang === 'tr'
   <div
     id="header-plaque"
     class="bg-espresso overflow-hidden transition-all duration-500 ease-in-out"
-    style="max-height: 120px;"
+    style="max-height: 160px;"
     aria-hidden="false"
   >
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center py-4">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center py-5">
       <a
         href={`/${lang}/`}
         class="group"
@@ -49,7 +49,7 @@ const announcement = lang === 'tr'
         <img
           src="/images/logo.png"
           alt="Çinili"
-          class="h-14 sm:h-16 w-auto object-contain drop-shadow-md
+          class="h-20 sm:h-24 w-auto object-contain drop-shadow-md
                  group-hover:opacity-90 transition-opacity duration-300"
           loading="eager"
         />
@@ -181,6 +181,10 @@ const announcement = lang === 'tr'
 
 <script>
   // ── Two-state scroll behaviour ─────────────────────────────────────────────
+  // Hysteresis: collapse when scrolling DOWN past 80px,
+  // restore only when scrolling back UP below 40px.
+  // This gap prevents the header-height-change → scrollY-shift feedback loop
+  // that causes jitter when scrolling slowly near the threshold.
   const header       = document.getElementById('site-header')!;
   const plaque       = document.getElementById('header-plaque')!;
   const strip        = document.getElementById('header-strip')!;
@@ -189,44 +193,45 @@ const announcement = lang === 'tr'
 
   let scrolled = false;
 
-  function applyState(isScrolled: boolean) {
-    if (isScrolled === scrolled) return;
-    scrolled = isScrolled;
+  const COLLAPSE_AT = 80;   // collapse  when scrollY crosses this going down
+  const RESTORE_AT  = 40;   // restore   when scrollY crosses this going up
 
-    if (isScrolled) {
-      // Collapse decorative blocks
-      plaque.style.maxHeight       = '0px';
-      plaque.style.paddingTop      = '0px';
-      plaque.style.paddingBottom   = '0px';
-      strip.style.maxHeight        = '0px';
-      announcement.style.maxHeight = '0px';
-      // Show inline logo
-      inlineLogo.style.opacity       = '1';
-      inlineLogo.style.pointerEvents = 'auto';
-      inlineLogo.removeAttribute('aria-hidden');
-      inlineLogo.tabIndex = 0;
-      // Add shadow to nav bar
-      header.style.boxShadow = '0 2px 20px rgba(0,0,0,0.35)';
-    } else {
-      // Restore decorative blocks
-      plaque.style.maxHeight       = '120px';
-      plaque.style.paddingTop      = '';
-      plaque.style.paddingBottom   = '';
-      strip.style.maxHeight        = '28px';
-      announcement.style.maxHeight = '36px';
-      // Hide inline logo
-      inlineLogo.style.opacity       = '0';
-      inlineLogo.style.pointerEvents = 'none';
-      inlineLogo.setAttribute('aria-hidden', 'true');
-      inlineLogo.tabIndex = -1;
-      header.style.boxShadow = '';
-    }
+  function collapse() {
+    plaque.style.maxHeight       = '0px';
+    plaque.style.paddingTop      = '0px';
+    plaque.style.paddingBottom   = '0px';
+    strip.style.maxHeight        = '0px';
+    announcement.style.maxHeight = '0px';
+    inlineLogo.style.opacity       = '1';
+    inlineLogo.style.pointerEvents = 'auto';
+    inlineLogo.removeAttribute('aria-hidden');
+    inlineLogo.tabIndex = 0;
+    header.style.boxShadow = '0 2px 20px rgba(0,0,0,0.35)';
   }
 
-  // Initial check (handles page load mid-scroll / back-navigation)
-  applyState(window.scrollY > 40);
+  function restore() {
+    plaque.style.maxHeight       = '160px';
+    plaque.style.paddingTop      = '';
+    plaque.style.paddingBottom   = '';
+    strip.style.maxHeight        = '28px';
+    announcement.style.maxHeight = '36px';
+    inlineLogo.style.opacity       = '0';
+    inlineLogo.style.pointerEvents = 'none';
+    inlineLogo.setAttribute('aria-hidden', 'true');
+    inlineLogo.tabIndex = -1;
+    header.style.boxShadow = '';
+  }
 
-  window.addEventListener('scroll', () => applyState(window.scrollY > 40), { passive: true });
+  function onScroll() {
+    const y = window.scrollY;
+    if (!scrolled && y > COLLAPSE_AT) { scrolled = true;  collapse(); }
+    if ( scrolled && y < RESTORE_AT)  { scrolled = false; restore();  }
+  }
+
+  // Initial state on page load / back-navigation
+  if (window.scrollY > COLLAPSE_AT) { scrolled = true; collapse(); }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
 
   // ── Mobile menu toggle ────────────────────────────────────────────────────
   const toggle   = document.getElementById('nav-toggle');
