@@ -1,11 +1,15 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ShopItemCard from '../../components/ShopItemCard.astro';
+import Carousel3D from '../../components/Carousel3D.astro';
 import { t } from '../../i18n/translations';
-import { shopItems } from '../../data/shopItems';
+import { getItemsByCategory } from '../../data/shopItems';
 
-const tr = t.tr;
-const page = tr.shop;
+const page = t.tr.shop;
+const cats = page.categories;
+const coffeeItems = getItemsByCategory('coffee');
+const tileItems   = getItemsByCategory('tiles');
+const carpetItems = getItemsByCategory('carpets');
 ---
 
 <BaseLayout title={page.meta.title} description={page.meta.description} lang="tr" currentPage="shop">
@@ -13,9 +17,7 @@ const page = tr.shop;
   <!-- Page header -->
   <div class="bg-parchment border-b border-warm-border py-16 sm:py-20 px-4">
     <div class="max-w-2xl mx-auto text-center">
-      <h1 class="font-serif text-4xl sm:text-5xl text-espresso font-semibold mb-4">
-        {page.heading}
-      </h1>
+      <h1 class="font-serif text-4xl sm:text-5xl text-espresso font-semibold mb-4">{page.heading}</h1>
       <p class="text-sand text-base sm:text-lg leading-relaxed mb-6">{page.intro}</p>
       <span class="inline-block text-sm text-caramel bg-caramel/10 px-4 py-2 rounded-full">
         {page.orderNote}
@@ -23,10 +25,33 @@ const page = tr.shop;
     </div>
   </div>
 
-  <section class="py-16 px-4">
+  <!-- Category tabs -->
+  <div class="sticky top-0 z-10 bg-cream border-b border-warm-border">
+    <div class="max-w-5xl mx-auto px-4 flex gap-1 py-3 overflow-x-auto">
+      {([
+        { key: 'coffee',  label: cats.coffee },
+        { key: 'tiles',   label: cats.tiles  },
+        { key: 'carpets', label: cats.carpets },
+      ] as const).map(({ key, label }) => (
+        <button
+          class="flex-shrink-0 px-5 py-2 rounded-lg text-sm font-medium transition-colors"
+          data-tab-btn={key}
+          type="button"
+          style={key === 'coffee'
+            ? 'background:#2C1A0E;color:#FAF7F0;'
+            : 'background:transparent;color:#7A6655;border:1px solid #E0D4C4;'}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <!-- ── Coffee section (grid) ── -->
+  <section data-tab-section="coffee" class="py-14 px-4">
     <div class="max-w-5xl mx-auto">
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {shopItems.map(item => (
+        {coffeeItems.map(item => (
           <ShopItemCard
             title={item.title.tr}
             description={item.description.tr}
@@ -41,4 +66,81 @@ const page = tr.shop;
     </div>
   </section>
 
+  <!-- ── Tiles section (3D carousel) ── -->
+  <section data-tab-section="tiles" class="py-14 px-4" hidden>
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-10">
+        <p class="text-xs font-medium tracking-[0.2em] uppercase text-caramel mb-2">{cats.tiles}</p>
+        <h2 class="font-serif text-3xl sm:text-4xl text-espresso font-semibold">El Yapımı Çini</h2>
+        <p class="text-sand mt-3 max-w-md mx-auto text-sm leading-relaxed">
+          Geleneksel Türk çini sanatından ilham alan özgün parçalar.
+        </p>
+      </div>
+      <Carousel3D
+        carouselId="carousel-tiles-tr"
+        items={tileItems.map(item => ({
+          id: item.id,
+          title: item.title.tr,
+          description: item.description.tr,
+          price: item.price,
+          badge: item.badge?.tr,
+          image: item.image,
+          externalUrl: item.externalUrl,
+        }))}
+        viewLabel={page.viewLabel}
+        prevLabel="Önceki"
+        nextLabel="Sonraki"
+      />
+    </div>
+  </section>
+
+  <!-- ── Carpets section (3D carousel) ── -->
+  <section data-tab-section="carpets" class="py-14 px-4" hidden>
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-10">
+        <p class="text-xs font-medium tracking-[0.2em] uppercase text-caramel mb-2">{cats.carpets}</p>
+        <h2 class="font-serif text-3xl sm:text-4xl text-espresso font-semibold">El Dokuması Halılar</h2>
+        <p class="text-sand mt-3 max-w-md mx-auto text-sm leading-relaxed">
+          Anadolu'nun köklü dokuma geleneğinden gelen özgün parçalar.
+        </p>
+      </div>
+      <Carousel3D
+        carouselId="carousel-carpets-tr"
+        items={carpetItems.map(item => ({
+          id: item.id,
+          title: item.title.tr,
+          description: item.description.tr,
+          price: item.price,
+          badge: item.badge?.tr,
+          image: item.image,
+          externalUrl: item.externalUrl,
+        }))}
+        viewLabel={page.viewLabel}
+        prevLabel="Önceki"
+        nextLabel="Sonraki"
+      />
+    </div>
+  </section>
+
 </BaseLayout>
+
+<script>
+  const tabs     = document.querySelectorAll<HTMLElement>('[data-tab-btn]');
+  const sections = document.querySelectorAll<HTMLElement>('[data-tab-section]');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tabBtn!;
+      tabs.forEach(t => {
+        const active = t === tab;
+        t.style.background = active ? '#2C1A0E' : 'transparent';
+        t.style.color      = active ? '#FAF7F0' : '#7A6655';
+        t.style.border     = active ? 'none' : '1px solid #E0D4C4';
+      });
+      sections.forEach(s => {
+        s.hidden = s.dataset.tabSection !== target;
+      });
+    });
+  });
+</script>
+

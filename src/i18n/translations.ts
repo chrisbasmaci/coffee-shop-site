@@ -65,6 +65,11 @@ export const t = {
       orderNote: 'Satın almak için bizi ziyaret edin veya iletişime geçin.',
       viewLabel: 'Ürünü İncele',
       buyLabel: 'Satın Al',
+      categories: {
+        coffee: 'Kahve',
+        tiles: 'Çini',
+        carpets: 'Halı',
+      },
     },
     contact: {
       meta: {
@@ -153,6 +158,11 @@ export const t = {
       orderNote: 'Visit us or get in touch to purchase.',
       viewLabel: 'View Item',
       buyLabel: 'Buy',
+      categories: {
+        coffee: 'Coffee',
+        tiles: 'Tiles',
+        carpets: 'Carpets',
+      },
     },
     contact: {
       meta: {
