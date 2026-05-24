@@ -192,7 +192,7 @@ const announcements = {
   let scrolled = false;
 
   function collapseHeader() {
-    if (logoImg)  logoImg.style.height = '3rem'; // fits inside 62px nav bar
+    if (logoImg && window.innerWidth >= 768)  logoImg.style.height = '3rem'; // desktop only — mobile logo is already small
     if (announcementBar) {
       announcementBar.style.maxHeight = '0';
       announcementBar.style.paddingTop = '0';
